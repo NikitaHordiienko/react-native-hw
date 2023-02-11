@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    View,
+    ImageBackground,
+    TextInput,
+    TouchableOpacity,
+    KeyboardAvoidingView,
+    TouchableWithoutFeedback,
+    Keyboard
+} from 'react-native';
 
 const backgroundImage = require('../assets/images/bgphoto.png');
 import AddIcon from '../assets/images/add.svg';
@@ -11,13 +21,13 @@ const inititalState = {
 }
 
 export default function RegistrationScreen() {
-    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-    const [isOnFocus, setIsOnFocus] = useState(false)
-    const [isPasswordHidden, setIsPasswordHidden] = useState(true);
     const [state, setState] = useState(inititalState);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+    const [activeInputName, setActiveInputName] = useState('');
+    const [isPasswordHidden, setIsPasswordHidden] = useState(true);
 
     const keyboardCloseToggle = () => {
-        setIsOnFocus(false)
+        setActiveInputName('')
         setIsKeyboardOpen(false)
         Keyboard.dismiss();
     }
@@ -38,54 +48,62 @@ export default function RegistrationScreen() {
                     source={backgroundImage}
                     style={styles.backgroundImage}                
                 >
-                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.containerWithKeyboard}>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={styles.containerWithKeyboard}
+                    >
                         <View style={{...styles.form, marginTop: isKeyboardOpen ? 134 : 295}}>
                             <View style={styles.avatarThumb}>
-                                <TouchableOpacity activeOpacity={0.7} style={styles.addAvatarBtn}>
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    style={styles.addAvatarBtn}
+                                >
                                     <AddIcon width={25} height={25}/>
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.formTitle}>Регистрация</Text>
+                            <Text style={styles.formTitle}>
+                                Регистрация
+                            </Text>
                             <View style={styles.formInputThumb}>
                                 <TextInput style={[styles.formInput, {
-                                    marginBottom: 16, isOnFocus,
-                                    backgroundColor: isOnFocus === 'login' ? '#FFFFFF' : '#F6F6F6',
-                                    borderColor: isOnFocus === 'login' ? '#FF6C00' : '#E8E8E8'
+                                    marginBottom: 16, activeInputName,
+                                    backgroundColor: activeInputName === 'login' ? '#FFFFFF' : '#F6F6F6',
+                                    borderColor: activeInputName === 'login' ? '#FF6C00' : '#E8E8E8'
                                     }]}
                                     placeholder='Логин'
                                     value={state.login}
                                     onFocus={() => {
                                         setIsKeyboardOpen(true);
-                                        setIsOnFocus('login')
+                                        setActiveInputName('login')
                                     }}
                                     onBlur={() => {
-                                        setIsOnFocus(false)
+                                        setActiveInputName('')
                                     }}
                                     onSubmitEditing={keyboardCloseToggle}
                                     onChangeText={(value) => setState((prevState) => ({...prevState, login: value}))}
                                 />
                                 <TextInput style={[styles.formInput, {
-                                    marginBottom: 16, isOnFocus,
-                                    backgroundColor: isOnFocus === 'email' ? '#FFFFFF' : '#F6F6F6',
-                                    borderColor: isOnFocus === 'email' ? '#FF6C00' : '#E8E8E8'
+                                    marginBottom: 16, activeInputName,
+                                    backgroundColor: activeInputName === 'email' ? '#FFFFFF' : '#F6F6F6',
+                                    borderColor: activeInputName === 'email' ? '#FF6C00' : '#E8E8E8'
                                     }]}
                                     placeholder='Адрес электронной почты'
                                     value={state.email}
                                     onFocus={() => {
                                         setIsKeyboardOpen(true);
-                                        setIsOnFocus('email')
+                                        setActiveInputName('email')
                                     }}
                                     onBlur={() => {
-                                        setIsOnFocus(false)
+                                        setActiveInputName('')
                                     }}
                                     onSubmitEditing={keyboardCloseToggle}
                                     onChangeText={(value) => setState((prevState) => ({...prevState, email: value}))}
                                 />
                                 <View style={styles.formPasswordThumb}>
                                     <TextInput style={[styles.formInput, {
-                                        isOnFocus,
-                                        backgroundColor: isOnFocus === 'password' ? '#FFFFFF' : '#F6F6F6',
-                                        borderColor: isOnFocus === 'password' ? '#FF6C00' : '#E8E8E8',
+                                        activeInputName,
+                                        backgroundColor: activeInputName === 'password' ? '#FFFFFF' : '#F6F6F6',
+                                        borderColor: activeInputName === 'password' ? '#FF6C00' : '#E8E8E8',
                                         paddingRight: 95
                                         }]}
                                         placeholder='Пароль'
@@ -93,29 +111,43 @@ export default function RegistrationScreen() {
                                         secureTextEntry={isPasswordHidden}
                                         onFocus={() => {
                                             setIsKeyboardOpen(true);
-                                            setIsOnFocus('password')
+                                            setActiveInputName('password')
                                         }}
                                         onBlur={() => {
-                                            setIsOnFocus(false)
+                                            setActiveInputName('')
                                         }}
                                         onSubmitEditing={keyboardCloseToggle}
                                         onChangeText={(value) => setState((prevState) => ({...prevState, password: value}))}
                                     />
-                                    <TouchableOpacity activeOpacity={0.5} style={styles.showPasswordBtn} onPress={passwordHideToggle}>
-                                        <Text style={styles.showPasswordBtnTitle}>{isPasswordHidden ? 'Показать' : 'Скрыть'}</Text>
+                                    <TouchableOpacity
+                                        activeOpacity={0.5}
+                                        style={styles.showPasswordBtn}
+                                        onPress={passwordHideToggle}
+                                    >
+                                        <Text style={styles.showPasswordBtnTitle}>
+                                            {isPasswordHidden ? 'Показать' : 'Скрыть'}
+                                        </Text>
                                     </TouchableOpacity>                            
                                 </View>                        
-                            </View>
-                            
-                            <TouchableOpacity activeOpacity={0.7} style={styles.registerBtn} onPress={onSubmitForm}>
-                                <Text style={styles.registerBtnTitle}>Зарегистрироваться</Text>
+                            </View>                            
+                            <TouchableOpacity
+                                activeOpacity={0.7} s
+                                style={styles.registerBtn}
+                                onPress={onSubmitForm}
+                            >
+                                <Text style={styles.registerBtnTitle}>
+                                    Зарегистрироваться
+                                </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity activeOpacity={0.5}>
-                                <Text style={styles.linkBtn}>Уже есть аккаунт? Войти</Text>
+                            <TouchableOpacity
+                                activeOpacity={0.5}
+                            >
+                                <Text style={styles.linkBtn}>
+                                    Уже есть аккаунт? Войти
+                                </Text>
                             </TouchableOpacity>                    
                         </View>
                     </KeyboardAvoidingView>
-
                 </ImageBackground>
                 </View>
             </TouchableWithoutFeedback>
@@ -147,7 +179,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 92,
         paddingBottom: 78,
-        // marginTop: 295,
         borderTopRightRadius: 25,
         borderTopLeftRadius: 25,
     },
