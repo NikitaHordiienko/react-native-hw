@@ -2,6 +2,11 @@ import { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import RegistrationScreen from './Screens/RegistrationScreen';
 import LoginScreen from './Screens/LoginScreen';
+import Home from './Screens/Home';
+import PostsScreen from './Screens/PostsScreen';
+import CreatePostsScreen from './Screens/CreatePostsScreen';
+import CommentScreen from './Screens/CommentsScreen';
+import ProfileScreen from './Screens/ProfileScreen';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -26,8 +31,13 @@ export default function App() {
   
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
-      <RegistrationScreen />
+      {/* <RegistrationScreen /> */}
       {/* <LoginScreen /> */}
+      {/* <Home /> */}
+      {/* <PostsScreen /> */}
+      {/* <CreatePostsScreen /> */}
+      {/* <CommentScreen /> */}
+      <ProfileScreen />
     </View>    
   );
 }

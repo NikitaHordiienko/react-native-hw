@@ -58,7 +58,7 @@ export default function RegistrationScreen() {
                                     activeOpacity={0.7}
                                     style={styles.addAvatarBtn}
                                 >
-                                    <AddIcon width={25} height={25}/>
+                                    <AddIcon style={{color: '#FF6C00'}} width={25} height={25}/>
                                 </TouchableOpacity>
                             </View>
                             <Text style={styles.formTitle}>
