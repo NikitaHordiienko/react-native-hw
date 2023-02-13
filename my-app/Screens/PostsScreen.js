@@ -16,7 +16,7 @@ const forestImage = require('../assets/images/forest.png');
 export default function PostsScreen() {
     return (
         <View style={styles.container}>
-            <View style={[styles.header, styles.shadowProp]}>
+            <View style={styles.header}>
                 <Text style={styles.screenTitle}>
                     Публикации
                 </Text>
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
+        backgroundColor: '#FFFFFF',
     },
     header: {
         flexDirection: 'row',
@@ -74,11 +75,8 @@ const styles = StyleSheet.create({
         height: 88,
         backgroundColor: '#FFFFFF',
         marginBottom: 32,
-    },
-    shadowProp: {
-        shadowColor: 'rgba(0, 0, 0, 0.3)',
-        shadowOffset: {width: -0.5, height: 0},
-        shadowOpacity: 1,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#E8E8E8',
     },
     screenTitle: {
         marginLeft: 'auto',

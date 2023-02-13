@@ -5,9 +5,6 @@ import {
     Image,
     TextInput,
     TouchableOpacity,
-    KeyboardAvoidingView,
-    TouchableWithoutFeedback,
-    Keyboard
 } from 'react-native';
 
 import BackIcon from '../assets/images/arrow-left.svg';
@@ -19,7 +16,7 @@ const userAvatar = require('../assets/images/user.png');
 export default function CommentScreen() {
     return (
         <View style={styles.container}>
-            <View style={[styles.header, styles.shadowProp]}>
+            <View style={styles.header}>
                 <TouchableOpacity
                     activeOpacity={0.7}
                     style={styles.backBtn}
@@ -104,11 +101,8 @@ const styles = StyleSheet.create({
         height: 88,
         backgroundColor: '#FFFFFF',
         marginBottom: 32,
-    },
-    shadowProp: {
-        shadowColor: 'rgba(0, 0, 0, 0.3)',
-        shadowOffset: {width: -0.5, height: 0},
-        shadowOpacity: 1,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#E8E8E8',
     },
     screenTitle: {
         marginLeft: 70,

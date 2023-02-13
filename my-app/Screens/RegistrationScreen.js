@@ -20,7 +20,7 @@ const inititalState = {
     password: '',
 }
 
-export default function RegistrationScreen() {
+export default function RegistrationScreen({navigation}) {
     const [state, setState] = useState(inititalState);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const [activeInputName, setActiveInputName] = useState('');
@@ -141,6 +141,7 @@ export default function RegistrationScreen() {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 activeOpacity={0.5}
+                                onPress={() => navigation.navigate('Login')}
                             >
                                 <Text style={styles.linkBtn}>
                                     Уже есть аккаунт? Войти

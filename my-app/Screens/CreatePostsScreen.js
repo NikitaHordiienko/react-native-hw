@@ -2,12 +2,8 @@ import {
     StyleSheet,
     Text,
     View,
-    ImageBackground,
     TextInput,
     TouchableOpacity,
-    KeyboardAvoidingView,
-    TouchableWithoutFeedback,
-    Keyboard
 } from 'react-native';
 
 import BackIcon from '../assets/images/arrow-left.svg';
@@ -15,13 +11,14 @@ import CameraIcon from '../assets/images/camera.svg';
 import MapIcon from '../assets/images/map-pin.svg';
 import TrashIcon from '../assets/images/trash.svg';
 
-export default function CreatePostsScreen() {
+export default function CreatePostsScreen({navigation}) {
     return (
         <View style={styles.container}>
-            <View style={[styles.header, styles.shadowProp]}>
+            <View style={styles.header}>
                 <TouchableOpacity
                     activeOpacity={0.7}
                     style={styles.backBtn}
+                    onPress={() => navigation.navigate('Posts')}
                 >
                     <BackIcon width={24} height={24}/>
                 </TouchableOpacity>
@@ -76,6 +73,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
+        backgroundColor: '#FFFFFF',
     },
     header: {
         flexDirection: 'row',
@@ -86,11 +84,8 @@ const styles = StyleSheet.create({
         height: 88,
         backgroundColor: '#FFFFFF',
         marginBottom: 32,
-    },
-    shadowProp: {
-        shadowColor: 'rgba(0, 0, 0, 0.3)',
-        shadowOffset: {width: -0.5, height: 0},
-        shadowOpacity: 1,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#E8E8E8',
     },
     screenTitle: {
         marginLeft: 70,

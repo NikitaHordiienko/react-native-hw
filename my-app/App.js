@@ -1,18 +1,17 @@
 import { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import RegistrationScreen from './Screens/RegistrationScreen';
-import LoginScreen from './Screens/LoginScreen';
-import Home from './Screens/Home';
-import PostsScreen from './Screens/PostsScreen';
-import CreatePostsScreen from './Screens/CreatePostsScreen';
-import CommentScreen from './Screens/CommentsScreen';
-import ProfileScreen from './Screens/ProfileScreen';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import useRoute from './router';
+
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+  const routing = useRoute({});
+
   const [fontsLoaded] = useFonts({
     'Roboto-Regular': require('./assets/fonts/Roboto-Regular.ttf'),
     'Roboto-Medium': require('./assets/fonts/Roboto-Medium.ttf'),
@@ -31,13 +30,10 @@ export default function App() {
   
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
-      {/* <RegistrationScreen /> */}
-      {/* <LoginScreen /> */}
-      {/* <Home /> */}
-      {/* <PostsScreen /> */}
-      {/* <CreatePostsScreen /> */}
-      {/* <CommentScreen /> */}
-      <ProfileScreen />
+      <StatusBar style="auto" />
+      <NavigationContainer>
+        {routing}
+      </NavigationContainer>
     </View>    
   );
 }
