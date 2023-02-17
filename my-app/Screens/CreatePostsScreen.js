@@ -1,17 +1,74 @@
+import { useState, useEffect } from 'react';
 import {
     StyleSheet,
     Text,
     View,
     TextInput,
     TouchableOpacity,
+    Image,
 } from 'react-native';
+import { Camera } from 'expo-camera';
+import * as Location from 'expo-location';
 
 import BackIcon from '../assets/images/arrow-left.svg';
 import CameraIcon from '../assets/images/camera.svg';
 import MapIcon from '../assets/images/map-pin.svg';
 import TrashIcon from '../assets/images/trash.svg';
 
-export default function CreatePostsScreen({navigation}) {
+export default function CreatePostsScreen({ navigation }) {
+    const [hasPermission, setHasPermission] = useState(null);
+    const [camera, setCamera] = useState(null);
+    const [photo, setPhoto] = useState(null);
+    const [isCameraReady, setIsCameraReady] = useState(false);
+    const [title, setTitle] = useState('');
+    const [location, setLocation] = useState(null);
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setHasPermission(status === "granted");
+        })();
+        (async () => {      
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setErrorMsg('Permission to access location was denied');
+                return;
+            }
+        })();
+    }, []);
+
+    const takePhoto = async () => {
+        const photo = await camera.takePictureAsync();
+        setPhoto(photo.uri);
+        let geoLocation = await Location.getCurrentPositionAsync({});
+        let address = await Location.reverseGeocodeAsync(geoLocation.coords);
+        setLocation(...address)
+    }
+
+    const onCameraReady = () => {
+        setIsCameraReady(true);
+    };
+
+    if (hasPermission === null) {
+        return <View />;
+    };
+
+    if (hasPermission === false) {
+        return <Text style={styles.text}>No access to camera</Text>;
+    };
+
+    const onSubmitForm = () => {
+        navigation.navigate('DefaultScreen', { photo, title, location });
+        setPhoto(null);
+        setTitle('');
+        setLocation(null);
+    };
+    const clearForm = () => {
+        setPhoto(null);
+        setTitle('');
+        setLocation(null);
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -27,44 +84,89 @@ export default function CreatePostsScreen({navigation}) {
                 </Text>
             </View>
             <View style={styles.form}>
-                <View style={styles.postPhotoThumb}>
-                    <TouchableOpacity
-                        activeOpacity={0.7}
-                        style={styles.cameraBtn}
+                {photo === null
+                    ?
+                    <Camera
+                        style={styles.postPhotoThumb}
+                        ref={setCamera}
+                        onCameraReady={onCameraReady}
                     >
-                        <CameraIcon width={24} height={24}/>
-                    </TouchableOpacity>                    
-                </View>
-                <Text style={styles.photoDownloadText}>Загрузите фото</Text>
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            style={{...styles.cameraBtn, backgroundColor: '#FFFFFF'}}
+                            onPress={takePhoto}
+                        >
+                            <CameraIcon
+                                style={{ color: '#BDBDBD' }}
+                                width={24}
+                                height={24}
+                            />
+                        </TouchableOpacity>                    
+                    </Camera>
+                    :
+                    <View style={styles.postPhotoThumb}>
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            style={{...styles.cameraBtn, backgroundColor: 'rgba(255, 255, 255, 0.3)'}}
+                            onPress={() => setPhoto(null)}
+                        >
+                            <CameraIcon
+                                style={{ color: '#FFFFFF' }}
+                                width={24}
+                                height={24}
+                            />
+                        </TouchableOpacity> 
+                        <Image
+                            style={styles.postImage}
+                            source={{ uri: photo }}
+                        />
+                    </View>
+                }                
+                <Text style={styles.photoDownloadText}>
+                    {photo === null ? 'Загрузите фото' : 'Редактировать фото'}
+                </Text>
                 <View style={styles.formInputThumb}>
                     <TextInput
                         style={[styles.formInput, { marginBottom: 16, fontFamily: 'Roboto-Medium' }]}
                         placeholder='Название...'
+                        value={title}
+                        onChangeText={(value) => setTitle(value)}
                     />
                     <View style={styles.formLocationInputThumb}>
                         <MapIcon style={styles.locationIcon} width={24} height={24}/>
                         <TextInput
-                            style={[styles.formInput, {paddingLeft: 28}]}
-                            placeholder='Местность...'
+                            style={[styles.formInput, { paddingLeft: 28 }]}
+                            editable={false}
+                            placeholder={photo === null ? 'Местность...' : 'Определяем местоположение...'}
+                            value={location === null ? '' : `${location.region}, ${location.country}`}
                         />
                     </View>
                 </View>
                 <TouchableOpacity
                     activeOpacity={0.7}
-                    style={styles.postBtn}
+                    style={{
+                        ...styles.postBtn,
+                        backgroundColor: photo === null || title === '' || location === null ? '#F6F6F6' : '#FF6C00'
+                    }}
+                    onPress={onSubmitForm}
                 >
-                    <Text style={styles.postBtnTitle}>
+                    <Text
+                        style={{
+                            ...styles.postBtnTitle,
+                            color: photo === null || title === '' || location === null ? '#BDBDBD' : '#FFFFFF'
+                        }}
+                    >
                         Опубликовать
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     activeOpacity={0.7}
                     style={styles.deleteBtn}
+                    onPress={clearForm}
                 >
                     <TrashIcon width={24} height={24}/>
                 </TouchableOpacity>
-            </View>
-            
+            </View>            
         </View>
     )
 }
@@ -99,6 +201,7 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
     },
     postPhotoThumb: {
+        position: 'relative',
         justifyContent: 'center',
         alignItems: 'center',
         width: 358,
@@ -116,7 +219,6 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: '50%',
-        backgroundColor: '#FFFFFF',
     },
     photoDownloadText: {
         fontFamily: 'Roboto-Regular',
@@ -148,7 +250,6 @@ const styles = StyleSheet.create({
     postBtn: {
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#F6F6F6',
         width: 358,
         height: 50,
         borderRadius: 100,
@@ -158,7 +259,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto-Regular',
         fontSize: 16,
         lineHeight: 19,
-        color: '#BDBDBD',
     },
     deleteBtn: {
         marginLeft: 'auto',
@@ -169,5 +269,12 @@ const styles = StyleSheet.create({
         width: 70,
         height: 40,
         borderRadius: 100,
-    }
+    },
+    postImage: {
+        position: 'absolute',
+        zIndex: -1,
+        width: 358,
+        height: 240,
+        resizeMode: 'cover',
+    },
 })

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
     StyleSheet,
     Text,
@@ -7,19 +8,35 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-import BackIcon from '../assets/images/arrow-left.svg';
-import SendIcon from '../assets/images/Vector.svg';
+import BackIcon from '../../assets/images/arrow-left.svg';
+import SendIcon from '../../assets/images/Vector.svg';
 
-const forestImage = require('../assets/images/forest.png');
-const userAvatar = require('../assets/images/user.png');
+const forestImage = require('../../assets/images/forest.png');
+const userAvatar = require('../../assets/images/user.png');
 
-export default function CommentScreen() {
+export default function CommentScreen({ navigation }) {
+    
+    useEffect(() => {
+        navigation.getParent()?.setOptions({
+            tabBarStyle: {
+                display: "none"
+        }
+        });
+        return () => navigation.getParent()?.setOptions({
+            tabBarStyle: {
+                display: "contents",
+                paddingHorizontal: 75,
+            },
+        });
+    }, [navigation]);
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity
                     activeOpacity={0.7}
                     style={styles.backBtn}
+                    onPress={() => navigation.navigate('DefaultScreen')}
                 >
                     <BackIcon width={24} height={24}/>
                 </TouchableOpacity>
@@ -28,12 +45,18 @@ export default function CommentScreen() {
                 </Text>
             </View>
             <View style={styles.postPhotoThumb}>
-                <Image  style={styles.postImage} source={forestImage} />                    
+                <Image
+                    style={styles.postImage}
+                    source={forestImage}
+                />                    
             </View>
             <View style={styles.commentsThumb}>
                 <View style={styles.friendThumb}>
                     <View style={styles.friendAvatarThumb}>
-                        <Image  style={styles.friendAvatar} source={forestImage} /> 
+                        <Image
+                            style={styles.friendAvatar}
+                            source={forestImage}
+                        /> 
                     </View>
                     <View style={styles.friendCommentThumb}>
                         <Text style={styles.friendComment}>
@@ -57,9 +80,15 @@ export default function CommentScreen() {
                         <Image  style={styles.friendAvatar} source={userAvatar} /> 
                     </View>
                 </View>
-                <View style={[styles.friendThumb, {marginBottom: 0}]}>
+                <View
+                    style={[styles.friendThumb, {
+                        marginBottom: 0
+                    }]}>
                     <View style={styles.friendAvatarThumb}>
-                        <Image  style={styles.friendAvatar} source={forestImage} /> 
+                        <Image
+                            style={styles.friendAvatar}
+                            source={forestImage}
+                        /> 
                     </View>
                     <View style={styles.friendCommentThumb}>
                         <Text style={styles.friendComment}>
@@ -91,6 +120,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
+        backgroundColor: '#FFFFFF',
     },
     header: {
         flexDirection: 'row',
