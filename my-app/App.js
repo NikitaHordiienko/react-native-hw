@@ -3,14 +3,16 @@ import { View, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
-import useRoute from './router';
 
+import { Provider } from 'react-redux';
+
+import { store } from './redux/store';
+
+import Main from './components/Main';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const routing = useRoute({});
 
   const [fontsLoaded] = useFonts({
     'Roboto-Regular': require('./assets/fonts/Roboto-Regular.ttf'),
@@ -29,12 +31,12 @@ export default function App() {
   }
   
   return (
-    <View style={styles.container} onLayout={onLayoutRootView}>
-      <StatusBar style="auto" />
-      <NavigationContainer>
-        {routing}
-      </NavigationContainer>
-    </View>    
+    <Provider store={store}>
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <StatusBar style="auto" />
+        <Main />
+      </View> 
+    </Provider>       
   );
 }
 

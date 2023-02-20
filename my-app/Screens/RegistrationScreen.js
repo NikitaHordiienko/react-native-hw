@@ -10,6 +10,8 @@ import {
     TouchableWithoutFeedback,
     Keyboard
 } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { authSignUpUser } from '../redux/auth/authOperations';
 
 const backgroundImage = require('../assets/images/bgphoto.png');
 import AddIcon from '../assets/images/add.svg';
@@ -26,6 +28,8 @@ export default function RegistrationScreen({navigation}) {
     const [activeInputName, setActiveInputName] = useState('');
     const [isPasswordHidden, setIsPasswordHidden] = useState(true);
 
+    const dispatch = useDispatch();
+
     const keyboardCloseToggle = () => {
         setActiveInputName('')
         setIsKeyboardOpen(false)
@@ -38,6 +42,7 @@ export default function RegistrationScreen({navigation}) {
 
     const onSubmitForm = () => {
         console.log(state);
+        dispatch(authSignUpUser(state));
         setState(inititalState);
     }
 

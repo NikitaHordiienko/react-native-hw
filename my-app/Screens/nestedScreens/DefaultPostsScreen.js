@@ -7,6 +7,10 @@ import {
     TouchableOpacity,
     FlatList,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { authSignOutUser } from '../../redux/auth/authOperations';
+import { dataBase } from '../../firebase/config';
 
 import CommentIcon from '../../assets/images/message-circle.svg';
 import MapIcon from '../../assets/images/map-pin.svg';
@@ -16,12 +20,25 @@ const userAvatar = require('../../assets/images/user.png');
 
 export default function DefaultPostsScreen({ route, navigation }) {
     const [posts, setPosts] = useState([]);
+    const dispatch = useDispatch();
+
+    const getAllPosts = async () => {
+        const postsCollection = await collection(dataBase, 'posts');
+
+        const showCollection = await onSnapshot(postsCollection, (snapshot) => {
+            setPosts(
+                snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+            );
+        });
+    }
+
+    const signOut = () => {
+        dispatch(authSignOutUser());
+    }
 
     useEffect(() => {
-        if (route.params) {
-            setPosts((prevState) => [...prevState, route.params])
-        }
-    }, [route.params]);
+        getAllPosts();
+    }, []);
  
     return (
         <View style={styles.container}>
@@ -32,6 +49,7 @@ export default function DefaultPostsScreen({ route, navigation }) {
                 <TouchableOpacity
                     activeOpacity={0.7}
                     style={styles.logOutBtn}
+                    onPress={signOut}
                 >
                     <LogOutIcon width={24} height={24}/>
                 </TouchableOpacity>
@@ -70,7 +88,7 @@ export default function DefaultPostsScreen({ route, navigation }) {
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 style={styles.postValueThumb}
-                                onPress={() => navigation.navigate('Comment')}
+                                onPress={() => navigation.navigate('Comment', {photo: item.photo, postId: item.id})}
                             >
                                 <CommentIcon width={24} height={24} />
                                 <Text style={styles.postCommentsNumber}>0</Text>
@@ -78,7 +96,7 @@ export default function DefaultPostsScreen({ route, navigation }) {
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 style={styles.postValueThumb}
-                                onPress={() => navigation.navigate('Map')}
+                                onPress={() => navigation.navigate('Map', {coordinates: item.coordinates})}
                             >
                                 <MapIcon width={24} height={24}/>
                                 <Text style={styles.postLocationTitle}>
@@ -87,7 +105,8 @@ export default function DefaultPostsScreen({ route, navigation }) {
                             </TouchableOpacity>
                         </View>
                     </View>
-                )} />           
+                )}
+            />           
         </View>
     )
 }
@@ -97,7 +116,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         backgroundColor: '#FFFFFF',
-        paddingBottom: 83,
     },
     header: {
         flexDirection: 'row',

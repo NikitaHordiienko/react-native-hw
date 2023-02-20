@@ -9,7 +9,8 @@ import MapView, { Marker } from 'react-native-maps';
 
 import BackIcon from '../../assets/images/arrow-left.svg';
 
-export default function MapScreen({ navigation }) {
+export default function MapScreen({ navigation, route }) {
+    const { latitude, longitude } = route.params.coordinates
     
     useEffect(() => {
         navigation.getParent()?.setOptions({
@@ -42,16 +43,16 @@ export default function MapScreen({ navigation }) {
             <MapView
                 style={{ flex: 1 }}
                 initialRegion={{
-                    longitude: 36.11779326576379,
-                    latitude: 49.96430913922404,
+                    longitude,
+                    latitude,
                     latitudeDelta: 0.001,
                     longitudeDelta: 0.006,
                 }}
             >
                 <Marker
                     coordinate={{
-                        longitude: 36.11779326576379,
-                        latitude: 49.96430913922404,
+                        longitude,
+                        latitude,
                     }}
                 />
             </MapView>        

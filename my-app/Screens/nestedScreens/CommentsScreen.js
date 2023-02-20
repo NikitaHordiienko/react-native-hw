@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -6,7 +6,10 @@ import {
     Image,
     TextInput,
     TouchableOpacity,
+    FlatList,
 } from 'react-native';
+import { dataBase } from '../../firebase/config';
+import { collection, addDoc, doc, onSnapshot } from 'firebase/firestore';
 
 import BackIcon from '../../assets/images/arrow-left.svg';
 import SendIcon from '../../assets/images/Vector.svg';
@@ -14,8 +17,23 @@ import SendIcon from '../../assets/images/Vector.svg';
 const forestImage = require('../../assets/images/forest.png');
 const userAvatar = require('../../assets/images/user.png');
 
-export default function CommentScreen({ navigation }) {
-    
+export default function CommentScreen({ navigation, route }) {
+    const { postId, photo } = route.params;
+
+    const [commentValue, setCommentValue] = useState('');
+    const [allComments, setAllComments] = useState([]);
+
+    const postsCollection = doc(dataBase, 'posts', postId);
+    const commentCollecton = collection(postsCollection, 'comments');
+
+    const getAllComments = async () => {
+        const showCommentsCollection = await onSnapshot(commentCollecton, (snapshot) => {
+            setAllComments(
+                snapshot.docs.map((doc) => ({ ...doc.data(), commentId: doc.id }))
+            );
+        });
+    }
+
     useEffect(() => {
         navigation.getParent()?.setOptions({
             tabBarStyle: {
@@ -30,6 +48,20 @@ export default function CommentScreen({ navigation }) {
         });
     }, [navigation]);
 
+    useEffect(() => {
+        getAllComments();
+    }, []);
+
+    const createComment = async () => {
+        setCommentValue('');
+        await addDoc(commentCollecton, { comment: commentValue, date: Date.now() });
+    }
+
+    const onSubmitForm = () => {
+        createComment();
+        setCommentValue('')
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -41,73 +73,51 @@ export default function CommentScreen({ navigation }) {
                     <BackIcon width={24} height={24}/>
                 </TouchableOpacity>
                 <Text style={styles.screenTitle}>
-                    Создать публикацию
+                    Комментарии
                 </Text>
             </View>
             <View style={styles.postPhotoThumb}>
                 <Image
                     style={styles.postImage}
-                    source={forestImage}
+                    source={{uri: photo}}
                 />                    
             </View>
-            <View style={styles.commentsThumb}>
-                <View style={styles.friendThumb}>
-                    <View style={styles.friendAvatarThumb}>
-                        <Image
-                            style={styles.friendAvatar}
-                            source={forestImage}
-                        /> 
+            <FlatList
+                data={allComments}
+                keyExtractor={(item) => item.commentId}
+                renderItem={({ item }) => (
+                    <View style={styles.commentsThumb}>
+                        <View style={styles.friendThumb}>
+                            <View style={styles.friendAvatarThumb}>
+                                <Image
+                                    style={styles.friendAvatar}
+                                    source={forestImage}
+                                /> 
+                            </View>
+                            <View style={styles.friendCommentThumb}>
+                                <Text style={styles.friendComment}>
+                                    {item.comment}
+                                </Text>
+                                <Text style={styles.friendCommentDate}>
+                                    {new Date(item.date).toLocaleString()}
+                                </Text>
+                            </View>
+                        </View>
                     </View>
-                    <View style={styles.friendCommentThumb}>
-                        <Text style={styles.friendComment}>
-                            Really love your most recent photo. I’ve been trying to capture the same thing for a few months and would love some tips!
-                        </Text>
-                        <Text style={styles.friendCommentDate}>
-                            09 июня, 2020 | 08:40
-                        </Text>
-                    </View>
-                </View>
-                <View style={styles.userThumb}>                    
-                    <View style={styles.userCommentThumb}>
-                        <Text style={styles.friendComment}>
-                            A fast 50mm like f1.8 would help with the bokeh. I’ve been using primes as they tend to get a bit sharper images.
-                        </Text>
-                        <Text style={styles.userCommentDate}>
-                            09 июня, 2020 | 09:14
-                        </Text>
-                    </View>
-                    <View style={styles.friendAvatarThumb}>
-                        <Image  style={styles.friendAvatar} source={userAvatar} /> 
-                    </View>
-                </View>
-                <View
-                    style={[styles.friendThumb, {
-                        marginBottom: 0
-                    }]}>
-                    <View style={styles.friendAvatarThumb}>
-                        <Image
-                            style={styles.friendAvatar}
-                            source={forestImage}
-                        /> 
-                    </View>
-                    <View style={styles.friendCommentThumb}>
-                        <Text style={styles.friendComment}>
-                            Thank you! That was very helpful!
-                        </Text>
-                        <Text style={styles.friendCommentDate}>
-                            09 июня, 2020 | 09:20
-                        </Text>
-                    </View>
-                </View>
-            </View>
+                )}
+            />
             <View style={styles.commentForm}>
                 <TextInput
                     style={[styles.formInput]}
                     placeholder='Комментировать...'
+                    value={commentValue}
+                    onChangeText={setCommentValue}
                 />
                 <TouchableOpacity
                     activeOpacity={0.7}
                     style={styles.sendBtn}
+
+                    onPress={onSubmitForm}
                 >
                     <SendIcon width={10} height={14} />
                 </TouchableOpacity>
@@ -135,7 +145,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#E8E8E8',
     },
     screenTitle: {
-        marginLeft: 70,
+        marginLeft: 100,
         marginRight: 'auto',
         paddingBottom: 11,
         fontFamily: 'Roboto-Medium',
@@ -161,7 +171,6 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
     commentsThumb: {
-        marginBottom: 32,
         paddingHorizontal: 16,
     },
     friendThumb: {
@@ -229,6 +238,9 @@ const styles = StyleSheet.create({
         lineHeight: 12,
         color: '#BDBDBD',
     },
+    commentForm: {
+        marginBottom: 30,
+    },
     formInput: {
         width: 358,
         height: 50,
@@ -255,3 +267,52 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 })
+
+                {/* <View style={styles.friendThumb}>
+                    <View style={styles.friendAvatarThumb}>
+                        <Image
+                            style={styles.friendAvatar}
+                            source={forestImage}
+                        /> 
+                    </View>
+                    <View style={styles.friendCommentThumb}>
+                        <Text style={styles.friendComment}>
+                            Really love your most recent photo. I’ve been trying to capture the same thing for a few months and would love some tips!
+                        </Text>
+                        <Text style={styles.friendCommentDate}>
+                            09 июня, 2020 | 08:40
+                        </Text>
+                    </View>
+                </View>
+                <View style={styles.userThumb}>                    
+                    <View style={styles.userCommentThumb}>
+                        <Text style={styles.friendComment}>
+                            A fast 50mm like f1.8 would help with the bokeh. I’ve been using primes as they tend to get a bit sharper images.
+                        </Text>
+                        <Text style={styles.userCommentDate}>
+                            09 июня, 2020 | 09:14
+                        </Text>
+                    </View>
+                    <View style={styles.friendAvatarThumb}>
+                        <Image  style={styles.friendAvatar} source={userAvatar} /> 
+                    </View>
+                </View>
+                <View
+                    style={[styles.friendThumb, {
+                        marginBottom: 0
+                    }]}>
+                    <View style={styles.friendAvatarThumb}>
+                        <Image
+                            style={styles.friendAvatar}
+                            source={forestImage}
+                        /> 
+                    </View>
+                    <View style={styles.friendCommentThumb}>
+                        <Text style={styles.friendComment}>
+                            Thank you! That was very helpful!
+                        </Text>
+                        <Text style={styles.friendCommentDate}>
+                            09 июня, 2020 | 09:20
+                        </Text>
+                    </View>
+                </View> */}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from "react-redux";
 import {
     StyleSheet,
     Text,
@@ -7,13 +8,17 @@ import {
     TouchableOpacity,
     Image,
 } from 'react-native';
+import { nanoid } from 'nanoid';
 import { Camera } from 'expo-camera';
 import * as Location from 'expo-location';
+import { storage, dataBase } from '../firebase/config';
 
 import BackIcon from '../assets/images/arrow-left.svg';
 import CameraIcon from '../assets/images/camera.svg';
 import MapIcon from '../assets/images/map-pin.svg';
 import TrashIcon from '../assets/images/trash.svg';
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
+import { collection, addDoc } from "firebase/firestore";
 
 export default function CreatePostsScreen({ navigation }) {
     const [hasPermission, setHasPermission] = useState(null);
@@ -22,6 +27,9 @@ export default function CreatePostsScreen({ navigation }) {
     const [isCameraReady, setIsCameraReady] = useState(false);
     const [title, setTitle] = useState('');
     const [location, setLocation] = useState(null);
+    const [coordinates, setCoordinates] = useState(null);
+
+     const { userId, login } = useSelector((state) => state.auth);
 
     useEffect(() => {
         (async () => {
@@ -41,6 +49,7 @@ export default function CreatePostsScreen({ navigation }) {
         const photo = await camera.takePictureAsync();
         setPhoto(photo.uri);
         let geoLocation = await Location.getCurrentPositionAsync({});
+        setCoordinates(geoLocation.coords)
         let address = await Location.reverseGeocodeAsync(geoLocation.coords);
         setLocation(...address)
     }
@@ -57,17 +66,60 @@ export default function CreatePostsScreen({ navigation }) {
         return <Text style={styles.text}>No access to camera</Text>;
     };
 
-    const onSubmitForm = () => {
-        navigation.navigate('DefaultScreen', { photo, title, location });
-        setPhoto(null);
-        setTitle('');
-        setLocation(null);
-    };
+
+
     const clearForm = () => {
         setPhoto(null);
         setTitle('');
         setLocation(null);
+        setCoordinates(null);
     }
+
+    const uploadPhotoToServer = async () => {
+        const response = await fetch(photo);
+        const file = await response.blob();
+
+        const uniquePostId = nanoid();
+
+        const data = await ref(storage, `postImage/${uniquePostId}`);
+
+        await uploadBytes(data, file).then((snap) => {
+            console.log('Uploaded success!');
+        });
+
+        const downloadedPhoto = await getDownloadURL(data)
+            .then((url) => {
+                return url;
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+        return downloadedPhoto;
+    };
+
+    const uploadedPostToServer = async () => {
+        const photo = await uploadPhotoToServer();
+
+        const data = {
+            title,
+            location,
+            coordinates,
+            photo,
+            userId,
+            login,
+        };
+
+        const createPost = await addDoc(collection(dataBase, 'posts'), data);
+    }
+
+    const onSubmitForm = () => {
+        uploadedPostToServer();
+        navigation.navigate('DefaultScreen', { photo, title, location, coordinates });
+        setPhoto(null);
+        setTitle('');
+        setLocation(null);
+    };
 
     return (
         <View style={styles.container}>
